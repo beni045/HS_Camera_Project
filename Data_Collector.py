@@ -1,6 +1,6 @@
 import time
 from ximea import xiapi
-import numpy
+import numpy as np
 import PIL.Image
 import os
 
@@ -20,7 +20,7 @@ cam.open_device()
 
 #settings
 cam.set_imgdataformat('XI_RAW16')
-cam.set_exposure(2500)
+cam.set_exposure(2000)
 print('Exposure was set to %i us' %cam.get_exposure())
 
 
@@ -41,7 +41,7 @@ cam.set_offsetY(400)
 start_time = time.time()
 
 
-for x in range(1000):
+for x in range(450):
     #get data and pass them from camera to img
     cam.get_image(img)
 
@@ -49,12 +49,20 @@ for x in range(1000):
     #for Python2.x function returns string
     #for Python3.x function returns bytes
     data_raw = img.get_image_data_numpy()
+
+   
     #print(type(data_raw))
     #transform data to list
     #data = list(data_raw)
+    #start_time = time.time()
+    #max_val = np.amax(data_raw)
+    #print("--- %f seconds ---" % (time.time() - start_time))
+    #print("--- Max val =%f ---" % (max_val))
     f= open("10Images_%d" % (x),"w+b")
     f.write(data_raw)
     f.close()
+    
+
     #print(type(data_raw))
     #print image data and metadata
     """print('Image number: ' + str(i))
@@ -64,10 +72,10 @@ for x in range(1000):
     print('\n')"""
 
     
-print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %f seconds ---" % (time.time() - start_time))
+#print("--- Max val =%f ---" % (max_val))
 
-
-print(type(data_raw))
+#print(type(data_raw))
 
 
 #stop data acquisition
