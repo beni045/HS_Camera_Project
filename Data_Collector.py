@@ -41,7 +41,7 @@ cam.set_offsetY(400)
 start_time = time.time()
 
 
-for x in range(450):
+for x in range(5):
     #get data and pass them from camera to img
     cam.get_image(img)
 
@@ -55,7 +55,7 @@ for x in range(450):
     #transform data to list
     #data = list(data_raw)
     #start_time = time.time()
-    #max_val = np.amax(data_raw)
+    max_val = np.amax(data_raw)
     #print("--- %f seconds ---" % (time.time() - start_time))
     #print("--- Max val =%f ---" % (max_val))
     f= open("10Images_%d" % (x),"w+b")
