@@ -1,0 +1,51 @@
+    def set_width(self, width):
+        '''
+        Width of the Image provided by the device (in pixels).XI_PRM_WIDTH
+        '''
+        self.set_param('width', width)
+
+
+
+    def set_height(self, height):
+        '''
+        Height of the Image provided by the device (in pixels).XI_PRM_HEIGHT
+        '''
+        self.set_param('height', height)
+
+
+
+    def set_offsetX(self, offsetX):
+        '''
+        Horizontal offset from the origin to the area of interest (in pixels).XI_PRM_OFFSET_X
+        '''
+        self.set_param('offsetX', offsetX)
+
+
+    def set_offsetY(self, offsetY):
+        '''
+        Vertical offset from the origin to the area of interest (in pixels).XI_PRM_OFFSET_Y
+        '''
+        self.set_param('offsetY', offsetY)
+
+
+
+
+
+
+    def set_trigger_selector(self, trigger_selector):
+        '''
+        Selects the type of trigger.XI_PRM_TRG_SELECTOR
+        '''
+        self.set_param('trigger_selector', trigger_selector)
+
+    def set_trigger_software(self, trigger_software):
+        '''
+        Generates an internal trigger. XI_PRM_TRG_SOURCE must be set to TRG_SOFTWARE.XI_PRM_TRG_SOFTWARE
+        '''
+        self.set_param('trigger_software', trigger_software)
+
+    def set_trigger_overlap(self, trigger_overlap):
+        '''
+        The mode of Trigger Overlap. This influences of trigger acception/rejection policyXI_PRM_TRG_OVERLAP
+        '''
+        self.set_param('trigger_overlap', trigger_overlap)
