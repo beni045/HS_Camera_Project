@@ -1,0 +1,17 @@
+4 Main chunks:
+
+1. Initial setup:
+Should prompt for user input and create every folder, excel entry, etc, for the given Session.
+
+2. Initial calibration:
+First, it should calibrate the ROI for the given Session, based on x number of initial layers.
+Then, the exposure time (and possibly gain) should be calibratied for every dataset, based on the first x layers.
+
+3. Data collection:
+Frames for a dataset are collected, timestamped and sorted on a layer-layer basis.
+
+4. Computation while the recoater is moving:
+Reduce data by a 2nd ROI on every frame.
+Print a short process summary for the user. Also note this summary in a file.
+(summary content tbd)
+
