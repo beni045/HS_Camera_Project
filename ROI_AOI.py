@@ -6,7 +6,7 @@ import math
 
 Centers_of_mass = np.array([[],[]])
 
-for filename in glob.glob(r'C:\Users\Beni\Documents\Ximea cam Python\ROI_supp_imgs\*.tif', recursive=True):
+for filename in glob.glob(r'C:\Users\n.gerdes\Documents\HSCam_PythonApi\Trial_Files\Imgs*.tif', recursive=True):
     current_img = cv2.imread(filename, cv2.IMREAD_UNCHANGED)
     
     # convert the grayscale image to binary image
