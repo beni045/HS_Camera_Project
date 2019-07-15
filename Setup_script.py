@@ -7,10 +7,13 @@ import sys
 import datetime
 import csv
 
+""" SET PATH OF SESSIONS FOLDER HERE"""
+Sessions_folder = (r"C:\Users\Beni\Documents\Ximea cam Python\Testing_Makedirs\Sessions")
 
 
 
 print("Hello")
+print("Sessions folder path: %s" %(Sessions_folder))
 print("Make sure the correct path for the Session folder is set!")
 Check_if_set = input("Press enter to continue. Type anything to terminate.")
 if (Check_if_set != ""):
@@ -21,8 +24,6 @@ if (Check_if_set != ""):
 Session_ID = uuid.uuid4()
 
 #create a folder for Session
-Sessions_folder = "C:\\Users\\Beni\\Documents\\Ximea cam Python\\Testing_Makedirs\\Sessions"
-print(Sessions_folder)
 os.chdir("%s" %(Sessions_folder))
 d = datetime.datetime.today()    
 Date_sesh = d.strftime('%d-%m-%Y')
@@ -104,7 +105,7 @@ while (Check_if_more != "Done" or Edit_or_not != ""):
 
 
 #exit the new directories to avoid external bugs
-os.chdir("%s" %(Sessions_folder))
+os.chdir(r"C:\Users\Beni\Documents\Ximea cam Python\Testing_Makedirs")
 
 
 
