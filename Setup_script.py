@@ -20,14 +20,15 @@ if (Check_if_set != ""):
 Session_ID = uuid.uuid4()
 
 #create a folder for Session
-Sesh_folder = "C:\\Users\\Beni\\Documents\\Ximea cam Python\\Testing_Makedirs\\Sessions"
+Sessions_folder = "C:\\Users\\Beni\\Documents\\Ximea cam Python\\Testing_Makedirs\\Sessions"
 
-print(Sesh_folder)
-os.chdir("%s" %(Sesh_folder))
+print(Sessions_folder)
+os.chdir("%s" %(Sessions_folder))
 d = datetime.datetime.today()    
 Date_sesh = d.strftime('%d-%m-%Y')
-if not os.path.exists('Session_%s_%s' %(Date_sesh,Session_ID)):
-       os.makedirs('Session_%s_%s' %(Date_sesh,Session_ID))
+Current_session_folder = ("Session_%s_%s" %(Date_sesh,Session_ID))
+if not os.path.exists('%s' %(Current_session_folder)):
+       os.makedirs('%s' %(Current_session_folder))
 
 
 #initialize variable for following block
@@ -41,8 +42,11 @@ while (Session_description_modify != ""):
     #show user the info so far and ask to confirm or modify    
     print("\nSession description: %s" %(Session_description))
     Session_description_modify = input("Session_ID: %s \n\nPress enter to confirm, type anything to modify:" %(Session_ID))
-    
-
+    if (Session_description_modify == ""):
+        os.chdir("%s" %(Current_session_folder))
+        f = open("Session_description.txt" , "w+")
+        f.write("Session_ID:%s\n\nSession_description: %s" %(Session_ID,Session_description))
+        f.close()
 #variable initialization for the following block
 Dataset_num_counter = 1
 Check_if_more = "NotDone"
