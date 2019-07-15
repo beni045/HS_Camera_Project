@@ -16,6 +16,7 @@ Check_if_set = input("Press enter to continue. Type anything to terminate.")
 if (Check_if_set != ""):
     sys.exit()
 
+
 #create unique id for the session
 Session_ID = uuid.uuid4()
 
@@ -47,6 +48,8 @@ while (Session_description_modify != ""):
         f = open("Session_description.txt" , "w+")
         f.write("Session_ID:%s\n\nSession_description: %s" %(Session_ID,Session_description))
         f.close()
+        
+        
 #variable initialization for the following block
 Dataset_num_counter = 1
 Check_if_more = "NotDone"
@@ -76,8 +79,8 @@ while (Check_if_more != "Done" or Edit_or_not != ""):
         Dataset_ID = uuid.uuid4()
         list = [Power, Speed, Layer_thickness, Num_Layers, Dataset_ID,Session_ID, Date ]
         os.chdir("%s" %(Sessions_folder))
-        with open('Index.csv' , 'a', newline = '') as f:
-            writer = csv.writer(f)   
+        with open('Index.csv' , 'a', newline = '') as g:
+            writer = csv.writer(g)   
             writer.writerow(list)
             
         #Make folder for dataset
@@ -90,15 +93,18 @@ while (Check_if_more != "Done" or Edit_or_not != ""):
             f = open("Dataset_description.txt" , "w+")
             f.write("Dataset_ID:%s\n\nDataset_description: %s" %(Dataset_ID,Dataset_description))
             f.close()
- 
+            
+            #Create a folder for every layer within the dataset                  
+            for i in range(1,int(Num_Layers)+1):
+                os.makedirs('Layer_%s' %(i)) 
+                i+=1
+       
+        #Prompt for another dataset or if done with all datasets    
         Check_if_more = input("Type 'Done', or press enter for next Dataset: ")
 
 
 #exit the new directories to avoid external bugs
 os.chdir("%s" %(Sessions_folder))
-
-
-
 
 
 
