@@ -8,7 +8,7 @@ import datetime
 import csv
 
 """ SET PATH OF SESSIONS FOLDER HERE"""
-Sessions_folder = (r"C:\Users\Beni\Documents\Ximea cam Python\Testing_Makedirs\Sessions")
+Sessions_folder = (r"C:\Users\n.gerdes\Documents\HSCam_PythonApi\Sessions")
 
 
 
@@ -105,7 +105,7 @@ while (Check_if_more != "Done" or Edit_or_not != ""):
 
 
 #exit the new directories to avoid external bugs
-os.chdir(r"C:\Users\Beni\Documents\Ximea cam Python\Testing_Makedirs")
+os.chdir(Sessions_folder)
 
 
 
