@@ -15,7 +15,7 @@ from simple_pid import PID
 
 #initialize variables
 num_frames = 200
-pid = PID(3, 0, 0, setpoint=210, sample_time = None)
+pid = PID(2, 1, 0, setpoint=100, sample_time = None)
 exposure_times = np.array([])
 max_vals = np.array([])
 #set path where images will be saved

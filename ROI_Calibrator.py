@@ -86,7 +86,7 @@ cam.set_width(Width)
 cam.set_height(Height)
 cam.set_offsetX(X_offset)
 cam.set_offsetY(Y_offset)
-
+cam.set_exposure(100)
 
 #obtain new frame with ROI applied
 cam.get_image(img)
