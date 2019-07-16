@@ -8,12 +8,14 @@ import matplotlib.pyplot as plt
 import glob
 import math
 from scipy import ndimage
-
+import seaborn as sb
+import matplotlib
+import matplotlib.pyplot as plt
 
 
 #initialize variables
 Centers_of_mass = np.array([[],[]])
-num_frames = 10
+num_frames = 20
 
 
 #set path where images will be saved
@@ -28,7 +30,7 @@ cam.open_device()
 
 #settings
 cam.set_imgdataformat('XI_RAW8')
-cam.set_exposure(60000)
+cam.set_exposure(10000)
 print('Exposure was set to %i us' %cam.get_exposure())
 
 
@@ -78,12 +80,6 @@ X_offset = int(X_offset)
 Y_offset = int(Y_offset)
 
 
-#checking if parameters are the right type
-print(type(Width))
-print(type(Height))
-print(type(X_offset))
-print(type(Y_offset))
-
 
 #set ROI
 cam.set_width(Width)
@@ -97,16 +93,13 @@ cam.get_image(img)
 data_raw_nda = img.get_image_data_numpy()
 
 
-#show result ROI image
-img = PIL.Image.fromarray(data_raw_nda, 'L')
-img.show()
-
-
 #stop camera
 cam.stop_acquisition()
 cam.close_device()
 
-
+#testing seaborn heatmap
+sb.heatmap(data_raw_nda)
+plt.show()
 #print summary of calibration
 print("ROI calibration summary:\n\n")
 print("Number of frames used: %s\n" %(num_frames))
