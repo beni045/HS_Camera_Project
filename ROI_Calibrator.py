@@ -63,25 +63,26 @@ for x in range(num_frames):
     cY = CM[0]
     Centers_of_mass = np.append(Centers_of_mass, ([cX],[cY]),axis=1)
   
-  
+
+
 #for timing the frame loop
 print("--- %f seconds ---" % (time.time() - start_time))
 
 
 #to to check if COM is correct
-img = PIL.Image.fromarray(data_raw_nda, 'L')
-img.show()
+#img = PIL.Image.fromarray(data_raw_nda, 'L')
+#img.show()
 
 
 #Calculate min,max valeues for both x and y centers of mass, then add 100 for an outer boundary
 Pre_width = (np.amax(Centers_of_mass[0])+100) - (np.amin(Centers_of_mass[0]-100))
 Pre_height = (np.amax(Centers_of_mass[1])+100) - (np.amin(Centers_of_mass[1])-100)
 #correct the width and height to the nearest 100 to make it a valid parameter
-Width = (round(Pre_width / 100))*100
-Height = (round(Pre_height / 100))*100
+Width = (round(Pre_width / 4))*4
+Height = (round(Pre_height / 2))*2
 #calculate requred offset and round to nearest 100
-X_offset = round(np.amin(Centers_of_mass[0]-100)/100)*100
-Y_offset = round(np.amin(Centers_of_mass[1]-100)/100)*100
+X_offset = round(np.amin(Centers_of_mass[0]-100)/4)*4
+Y_offset = round(np.amin(Centers_of_mass[1]-100)/2)*2
 
 
 #Convert ROI parameters to integers
@@ -98,12 +99,41 @@ print(type(X_offset))
 print(type(Y_offset))
 
 
-#set ROI
 cam.set_width(Width)
 cam.set_height(Height)
 cam.set_offsetX(X_offset)
 cam.set_offsetY(Y_offset)
 
+cam.get_image(img)
+data_raw_nda = img.get_image_data_numpy()
+
+
+img = PIL.Image.fromarray(data_raw_nda, 'L')
+img.show()
+#stop camera
+cam.stop_acquisition()
+cam.close_device()
+
+
+"""#create instance for first connected camera
+cam = xiapi.Camera()
+print('Opening first camera...')
+cam.open_device()
+
+
+#settings
+cam.set_imgdataformat('XI_RAW8')
+cam.set_exposure(60000)
+print('Exposure was set to %i us' %cam.get_exposure())
+
+
+#create instance of Image to store image data and metadata
+img = xiapi.Image()
+
+
+#start data acquisition
+print('Starting data acquisition...')
+cam.start_acquisition()
 
 #get a frame with new ROI    
 cam.get_image(img)
@@ -118,7 +148,7 @@ cam.close_device()
 #to to check if COM is correct
 img = PIL.Image.fromarray(data_raw_nda, 'L')
 img.show()
-
+"""
 
 #print summary of calibration
 print("ROI calibration summary:\n\n")
