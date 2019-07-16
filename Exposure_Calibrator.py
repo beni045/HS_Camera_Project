@@ -14,9 +14,8 @@ import matplotlib.pyplot as plt
 from simple_pid import PID
 
 #initialize variables
-num_frames = 20
-new_exposure = 100
-pid = PID(1, 0.1, 0.05, setpoint=200)
+num_frames = 100
+pid = PID(1, 0, 0, setpoint=200)
 
 
 #set path where images will be saved
@@ -48,7 +47,7 @@ cam.start_acquisition()
 start_time = time.time()
 
 
-for 100 in range(num_frames):
+for x in range(num_frames):
     
     #get data and pass them from camera to img
     cam.get_image(img)
