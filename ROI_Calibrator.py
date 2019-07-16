@@ -41,14 +41,6 @@ print('Starting data acquisition...')
 cam.start_acquisition()
 
 
-#set ROI
-"""
-cam.set_width(200)
-cam.set_height(200)
-cam.set_offsetX(900)
-cam.set_offsetY(500) """
-
-
 #for timing the frame loop
 start_time = time.time()
 
@@ -64,14 +56,8 @@ for x in range(num_frames):
     Centers_of_mass = np.append(Centers_of_mass, ([cX],[cY]),axis=1)
   
 
-
 #for timing the frame loop
 print("--- %f seconds ---" % (time.time() - start_time))
-
-
-#to to check if COM is correct
-#img = PIL.Image.fromarray(data_raw_nda, 'L')
-#img.show()
 
 
 #Calculate min,max valeues for both x and y centers of mass, then add 100 for an outer boundary
@@ -99,56 +85,27 @@ print(type(X_offset))
 print(type(Y_offset))
 
 
+#set ROI
 cam.set_width(Width)
 cam.set_height(Height)
 cam.set_offsetX(X_offset)
 cam.set_offsetY(Y_offset)
 
+
+#obtain new frame with ROI applied
 cam.get_image(img)
 data_raw_nda = img.get_image_data_numpy()
 
 
+#show result ROI image
 img = PIL.Image.fromarray(data_raw_nda, 'L')
 img.show()
-#stop camera
-cam.stop_acquisition()
-cam.close_device()
-
-
-"""#create instance for first connected camera
-cam = xiapi.Camera()
-print('Opening first camera...')
-cam.open_device()
-
-
-#settings
-cam.set_imgdataformat('XI_RAW8')
-cam.set_exposure(60000)
-print('Exposure was set to %i us' %cam.get_exposure())
-
-
-#create instance of Image to store image data and metadata
-img = xiapi.Image()
-
-
-#start data acquisition
-print('Starting data acquisition...')
-cam.start_acquisition()
-
-#get a frame with new ROI    
-cam.get_image(img)
-data_raw_nda = img.get_image_data_numpy()
 
 
 #stop camera
 cam.stop_acquisition()
 cam.close_device()
 
-
-#to to check if COM is correct
-img = PIL.Image.fromarray(data_raw_nda, 'L')
-img.show()
-"""
 
 #print summary of calibration
 print("ROI calibration summary:\n\n")
