@@ -14,23 +14,24 @@ import matplotlib.pyplot as plt
 from simple_pid import PID
 
 #initialize variables
-num_frames = 100
-pid = PID(1, 0, 0, setpoint=200)
-
-
+num_frames = 200
+pid = PID(3, 0, 0, setpoint=210, sample_time = None)
+exposure_times = np.array([])
+max_vals = np.array([])
 #set path where images will be saved
 os.chdir(r'C:\\Users\\n.gerdes\\Documents\\HSCam_PythonApi\\Trial_Files\\Imgs')
+new_exp = 100
 
 
 #create instance for first connected camera
 cam = xiapi.Camera()
 print('Opening first camera...')
 cam.open_device()
-
+print(cam.get_exposure_increment())
 
 #settings
 cam.set_imgdataformat('XI_RAW8')
-cam.set_exposure(100)
+cam.set_exposure(new_exp)
 print('Exposure was set to %i us' %cam.get_exposure())
 
 
@@ -56,20 +57,20 @@ for x in range(num_frames):
     
     #exposure time PID
     max_val = np.amax(data_raw_nda)
-    if (max_val < 3):
-        max_val = 3
+    max_vals = np.append(max_vals, ([max_val]),axis=0)                   
     output = pid(max_val)
-    if (output > 60000):
-        output = 60000
-    if (output < 100):
-        output = 100
-    cam.set_exposure(output)
-    
-    
+    new_exp = new_exp + output
+    new_exp = (round(new_exp / 5))*5
+    new_exp = int(new_exp)
+    if (new_exp < 50000 and new_exp > 0):            
+            cam.set_exposure(new_exp)
+    exposure_times = np.append(exposure_times, ([new_exp]),axis=0)    
+#    exposure_times = np.append(exposure_times, ([output]),axis=0)
+#    max_vals = np.append(max_vals, ([max_val]),axis=0)
 #for timing the frame loop
 print("--- %f seconds ---" % (time.time() - start_time))
 
-new_exposure = output
+#new_exposure = output
 #obtain new frame with ROI applied
 cam.get_image(img)
 data_raw_nda = img.get_image_data_numpy()
@@ -81,19 +82,12 @@ cam.close_device()
 
 
 #testing seaborn heatmap
-
-print(new_exposure)
+print(max_vals)
+print(exposure_times)
+#print(int(new_exposure))
 print(max_val)
 sb.heatmap(data_raw_nda)
 plt.show()
 
 
-#print summary of calibration
-print("ROI calibration summary:\n\n")
-print("Number of frames used: %s\n" %(num_frames))
-print("Centers of mass array: %s\n" %(Centers_of_mass))
-print("Calibrated Width: %s\n" %(Width))
-print("Calibrated Height: %s\n" %(Height))
-print("Calibrated X_offset: %s\n" %(X_offset))
-print("Calibrated Y_offset: %s\n\n" %(Y_offset))
-print('Done.')
+
