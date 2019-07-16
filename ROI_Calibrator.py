@@ -7,17 +7,21 @@ import cv2
 import matplotlib.pyplot as plt
 import glob
 import math
+from scipy import ndimage
+
+
+
+#initialize variables
+Centers_of_mass = np.array([[],[]])
+num_frames = 10
+
 
 #set path where images will be saved
 os.chdir(r'C:\\Users\\n.gerdes\\Documents\\HSCam_PythonApi\\Trial_Files\\Imgs')
 
+
 #create instance for first connected camera
 cam = xiapi.Camera()
-
-#start communication
-#to open specific device, use:
-#cam.open_device_by_SN('41305651')
-#(open by serial number)
 print('Opening first camera...')
 cam.open_device()
 
@@ -31,142 +35,97 @@ print('Exposure was set to %i us' %cam.get_exposure())
 #create instance of Image to store image data and metadata
 img = xiapi.Image()
 
+
 #start data acquisition
 print('Starting data acquisition...')
 cam.start_acquisition()
 
-#set ROI
 
+#set ROI
+"""
 cam.set_width(200)
 cam.set_height(200)
 cam.set_offsetX(900)
-cam.set_offsetY(500)
+cam.set_offsetY(500) """
 
 
+#for timing the frame loop
 start_time = time.time()
-Centers_of_mass = np.array([[],[]])
 
-for x in range(10):
+
+for x in range(num_frames):
     #get data and pass them from camera to img
     cam.get_image(img)
-
-    #get raw data from camera
-    #for Python2.x function returns string
-    #for Python3.x function returns bytes
-    data_raw = img.get_image_data_numpy()
-
-
-
-
- 
-    # calculate moments of binary image
-    M = cv2.moments(data_raw)
- 
-    # calculate x,y coordinate of center
-    cX = int(M["m10"] / M["m00"])
-    cY = int(M["m01"] / M["m00"])
+    data_raw_nda = img.get_image_data_numpy()
+    #calculate COM for frame array and store it in Centers_of_mass array
+    CM = ndimage.measurements.center_of_mass(data_raw_nda)
+    cX = CM[1]
+    cY = CM[0]
     Centers_of_mass = np.append(Centers_of_mass, ([cX],[cY]),axis=1)
-    ROI = data_raw[cY - 100:cY + 100,cX - 100:cX + 100]
-    
-#    cv2.imshow("Image", ROI)
-#    cv2.waitKey(0)
-
-   
-    #print(type(data_raw))
-    #transform data to list
-    #data = list(data_raw)
-    #start_time = time.time()
-    
-    max_val = np.amax(data_raw)
-    
-    #print("--- %f seconds ---" % (time.time() - start_time))
-    #print("--- Max val =%f ---" % (max_val))
-    f= open("10Images_%d.tif" % (x),"w+b")
-    f.write(data_raw)
-    f.close()
-    
-
-    
+  
+  
+#for timing the frame loop
 print("--- %f seconds ---" % (time.time() - start_time))
-#print("--- Max val =%f ---" % (max_val))
-
-#print(type(data_raw))
 
 
-
-
-
-
-#stop data acquisition
-print('Stopping acquisition...')
-cam.stop_acquisition()
-
-
-
-
-#stop communication
-cam.close_device()
-
-
-print(type(data_raw))
-img = PIL.Image.fromarray(data_raw, 'L')
+#to to check if COM is correct
+img = PIL.Image.fromarray(data_raw_nda, 'L')
 img.show()
 
 
-#print(cX, cY)
-#cv2.destroyAllWindows()
-
-print(Centers_of_mass)
-#print(Centers_of_mass.shape)
-
-#print(Centers_of_mass[1])
-
-
-
+#Calculate min,max valeues for both x and y centers of mass, then add 100 for an outer boundary
 Pre_width = (np.amax(Centers_of_mass[0])+100) - (np.amin(Centers_of_mass[0]-100))
 Pre_height = (np.amax(Centers_of_mass[1])+100) - (np.amin(Centers_of_mass[1])-100)
-
-print(Pre_width)
-print(Pre_height)
-
+#correct the width and height to the nearest 100 to make it a valid parameter
 Width = (round(Pre_width / 100))*100
 Height = (round(Pre_height / 100))*100
-
-print(int(Width))
-print(int(Height))
-
+#calculate requred offset and round to nearest 100
 X_offset = round(np.amin(Centers_of_mass[0]-100)/100)*100
-
-print(int(X_offset))
-
 Y_offset = round(np.amin(Centers_of_mass[1]-100)/100)*100
 
-print(int(Y_offset))
+
+#Convert ROI parameters to integers
+Width = int(Width)
+Height = int(Height)
+X_offset = int(X_offset)
+Y_offset = int(Y_offset)
 
 
-cam.set_width(int(Width))
-cam.set_height(int(Height))
-cam.set_offsetX(int(X_offset))
-cam.set_offsetY(int(Y_offset))
+#checking if parameters are the right type
+print(type(Width))
+print(type(Height))
+print(type(X_offset))
+print(type(Y_offset))
 
 
+#set ROI
+cam.set_width(Width)
+cam.set_height(Height)
+cam.set_offsetX(X_offset)
+cam.set_offsetY(Y_offset)
+
+
+#get a frame with new ROI    
 cam.get_image(img)
-#get raw data from camera
-    #for Python2.x function returns string
-    #for Python3.x function returns bytes
-data_raw = img.get_image_data_numpy()
+data_raw_nda = img.get_image_data_numpy()
 
 
+#stop camera
 cam.stop_acquisition()
-
-
-
-
-#stop communication
 cam.close_device()
 
-img = PIL.Image.fromarray(data_raw, 'L')
+
+#to to check if COM is correct
+img = PIL.Image.fromarray(data_raw_nda, 'L')
 img.show()
 
-print('Done.')
 
+#print summary of calibration
+print("ROI calibration summary:\n\n")
+print("Number of frames used: %s\n" %(num_frames))
+print("Centers of mass array: %s\n" %(Centers_of_mass))
+print("Calibrated Width: %s\n" %(Width))
+print("Calibrated Height: %s\n" %(Height))
+print("Calibrated X_offset: %s\n" %(X_offset))
+print("Calibrated Y_offset: %s\n\n" %(Y_offset))
+print('Done.')
