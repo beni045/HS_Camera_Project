@@ -1,8 +1,20 @@
-#Import packages here
-
-
-
-
+import time
+from ximea import xiapi
+import numpy as np
+import PIL.Image
+import os
+import cv2
+import matplotlib.pyplot as plt
+import math
+from scipy import ndimage
+import seaborn as sb
+import matplotlib
+from simple_pid import PID
+import uuid
+import sys
+import datetime
+import csv
+import glob
 
 
 
@@ -35,27 +47,12 @@ calibrate_ROI()
 
 
 #main(total layers)
-while()
-
-worktime()
-
-
-
-
-
-
-
-#breaktime()
-
-
-
-
-tracking function() 
-
-
-
-
-#safety_exposure()
+try:
+    while True:
+        worktime()
+        breatime()
+except KeyboardInterrupt:
+    pass
 
 
 
@@ -391,23 +388,16 @@ def breatime():
 
 def waitfor_on():
     while(laser_off(20,30)==1):
-    cam.get_image(img)
-    data_raw_nda = img.get_image_data_numpy()
-    max_val = np.amax(data_raw_nda) 
-    do_nothing+=1
-    do_nothing-=1
+        cam.get_image(img)
+        data_raw_nda = img.get_image_data_numpy()
+        max_val = np.amax(data_raw_nda) 
+        do_nothing+=1
+        do_nothing-=1
 
 
 def worktime():
     framecount=1
-    if(current_layer_num > Layers[dataset_num]):
-        dataset_num+=1
-        current_layer_num=1
-        if((dataset_num+1) > len(Datasets)):
-            #stop camera
-            cam.stop_acquisition()
-            cam.close_device()          
-            sys.exit()
+    if(current_layer_num ==1):
         calibrate_exposure(10000000, 3,150,60000)
     os.chdir("%s\\%s\\%s\\Layer_%s" %(Sessions_folder,Current_session_folder,Datasets[dataset_num],current_layer_num))
     while(laser_off(20,30)==0):
@@ -420,8 +410,12 @@ def worktime():
         f.write(data_raw_nda)
         f.close()
         framecount+=1
-     current_layer_num+=1   
-
-
-
-
+    current_layer_num+=1
+    if(current_layer_num > Layers[dataset_num]):
+        dataset_num+=1
+        current_layer_num=1
+        if((dataset_num+1) > len(Datasets)):
+            #stop camera
+            cam.stop_acquisition()
+            cam.close_device()          
+            sys.exit()
