@@ -28,9 +28,11 @@ current_layer_num=1
 max_val = 10
 off_counter = 0
 roi_layer_counter = 1
-
+off_counter = 0
+data_raw_nda =0
 def setup_folders():
     """ SET PATH OF SESSIONS FOLDER HERE"""
+    global  Sessions_folder
     Sessions_folder = (r"C:\Users\Beni\Documents\Ximea cam Python\Testing_Makedirs\Sessions")
     
     print("Hello")
@@ -48,6 +50,7 @@ def setup_folders():
     os.chdir("%s" %(Sessions_folder))
     d = datetime.datetime.today()    
     Date_sesh = d.strftime('%d-%m-%Y')
+    global Current_session_folder
     Current_session_folder = ("Session_%s_%s" %(Date_sesh,Session_ID))
     if not os.path.exists('%s' %(Current_session_folder)):
            os.makedirs('%s' %(Current_session_folder))
@@ -159,19 +162,22 @@ data_raw_nda = img.get_image_data_numpy()
 def laser_off(off_threshold,count_threshold):
     max_val = np.amax(data_raw_nda) 
     if (max_val < off_threshold):
+        global off_counter
         off_counter+=1
     else:
         off_counter=0
     if (off_counter > count_threshold):
+        off_counter=0
         return 1
     else:
         return 0
 
-
+data_raw_nda = 0
 def breaktime():  
     do_nothing = 1
     while(laser_off(20,100)==1):
         cam.get_image(img)
+        global data_raw_nda
         data_raw_nda = img.get_image_data_numpy()
         
         do_nothing+=1
@@ -182,6 +188,7 @@ def waitfor_on():
     do_nothing=1
     while(laser_off(20,100)==1):
         cam.get_image(img)
+        global data_raw_nda
         data_raw_nda = img.get_image_data_numpy()
         
         do_nothing+=1
@@ -295,6 +302,8 @@ def worktime():
         calibrate_exposure(10000000, 3,150,60000)
     os.chdir("%s\\%s\\%s\\Layer_%s" %(Sessions_folder,Current_session_folder,Datasets[dataset_num],current_layer_num))
     while(laser_off(20,30)==0):
+        global max_val
+        global data_raw_nda
         max_val = np.amax(data_raw_nda)
         cam.get_image(img)
         data_raw_nda = img.get_image_data_numpy()
@@ -304,8 +313,10 @@ def worktime():
         f.write(data_raw_nda)
         f.close()
         framecount+=1
+    global current_layer_num
     current_layer_num+=1
     if(current_layer_num > Layers[dataset_num]):
+        global dataset_num
         dataset_num+=1
         current_layer_num=1
         if((dataset_num+1) > len(Datasets)):
@@ -319,6 +330,29 @@ def worktime():
 
 
 
+
+
+cam = xiapi.Camera()
+print('Opening first camera...')
+cam.open_device()
+
+
+#settings
+cam.set_imgdataformat('XI_RAW8')
+cam.set_exposure(10000)
+print('Exposure was set to %i us' %cam.get_exposure())
+
+
+#create instance of Image to store image data and metadata
+img = xiapi.Image()
+
+
+#start data acquisition
+print('Starting data acquisition...')
+cam.start_acquisition()
+
+cam.get_image(img)
+data_raw_nda = img.get_image_data_numpy()
 
 
 
@@ -343,7 +377,7 @@ calibrate_ROI(200000 , 2, 100)
 try:
     while True:
         worktime()
-        breatime()
+        breaktime()
 except KeyboardInterrupt:
     pass
 
