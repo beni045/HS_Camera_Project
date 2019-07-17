@@ -306,6 +306,8 @@ def worktime():
 
 
 
+
+
 setup_folders()
 
 
@@ -340,7 +342,7 @@ breaktime()
 
 calibrate_exposure(250 , 20, 150, 60000)
 
-calibrate_ROI(200000 , 2, 100)
+calibrate_ROI(1000 , 2, 100)
 
 
 
