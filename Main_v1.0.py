@@ -10,6 +10,9 @@
 #initialize variables here
 
 
+dataset_num=0
+current_layer_num=1
+
 
 
 
@@ -32,7 +35,7 @@ calibrate_ROI()
 
 
 #main(total layers)
-
+while()
 
 worktime()
 
@@ -65,7 +68,8 @@ def setup_folders():
     Sessions_folder = (r"C:\Users\n.gerdes\Documents\HSCam_PythonApi\Sessions")
     
     
-    
+    Datasets = []
+    Layers = []
     print("Hello")
     print("Sessions folder path: %s" %(Sessions_folder))
     print("Make sure the correct path for the Session folder is set!")
@@ -133,6 +137,7 @@ def setup_folders():
             Date = d.strftime('%d-%m-%Y')
             Dataset_ID = uuid.uuid4()
             list = [Power, Speed, Layer_thickness, Num_Layers, Dataset_ID,Session_ID, Date ]
+            Layers.append(Num_Layers)
             os.chdir("%s" %(Sessions_folder))
             with open('Index.csv' , 'a', newline = '') as g:
                 writer = csv.writer(g)   
@@ -144,6 +149,7 @@ def setup_folders():
             Current_dataset_folder = ("Dataset_%s_%s-%s-%s_%s" %(Dataset_num_counter-1,Power,Speed,Layer_thickness,Dataset_ID))
             if not os.path.exists('%s' %(Current_dataset_folder)):
                 os.makedirs('%s' %(Current_dataset_folder))
+                Datasets.append(Current_dataset_folder)
                 os.chdir("%s\\%s\\%s" %(Sessions_folder,Current_session_folder,Current_dataset_folder))
                 f = open("Dataset_description.txt" , "w+")
                 f.write("Dataset_ID:%s\n\nDataset_description: %s" %(Dataset_ID,Dataset_description))
@@ -393,19 +399,29 @@ def waitfor_on():
 
 
 def worktime():
-    os.chdir('C:\\Users\\n.gerdes\\Documents\\HSCam_PythonApi\\Trial_Files\\Imgs'%())
+    framecount=1
+    if(current_layer_num > Layers[dataset_num]):
+        dataset_num+=1
+        current_layer_num=1
+        if((dataset_num+1) > len(Datasets)):
+            #stop camera
+            cam.stop_acquisition()
+            cam.close_device()          
+            sys.exit()
+        calibrate_exposure(10000000, 3,150,60000)
+    os.chdir("%s\\%s\\%s\\Layer_%s" %(Sessions_folder,Current_session_folder,Datasets[dataset_num],current_layer_num))
     while(laser_off(20,30)==0):
         max_val = np.amax(data_raw_nda)
         cam.get_image(img)
         data_raw_nda = img.get_image_data_numpy()
         #print("--- %f seconds ---" % (time.time() - start_time))
         #print("--- Max val =%f ---" % (max_val))
-        f= open("10Images_%d" % (x),"w+b")
+        f= open("%d" % (framecount),"w+b")
         f.write(data_raw_nda)
         f.close()
-        
+        framecount+=1
+     current_layer_num+=1   
 
 
 
-os.chdir("%s\\%s\\%s\\%s" %(Sessions_folder,Current_session_folder,Current_dataset_folder,Layer_Num))
 
