@@ -20,53 +20,19 @@ import glob
 
 
 #initialize variables here
-
-
+    
+Datasets = []
+Layers = []
 dataset_num=0
 current_layer_num=1
-
-
-
-
-
-setup_folders()
-
-
-#setup2()
-
-waitfor_on()
-
-calibrate_exposure()
-
-calibrate_ROI()
-
-
-
-
-
-
-
-#main(total layers)
-try:
-    while True:
-        worktime()
-        breatime()
-except KeyboardInterrupt:
-    pass
-
-
-
-
+max_val = 10
 
 
 
 def setup_folders():
     """ SET PATH OF SESSIONS FOLDER HERE"""
-    Sessions_folder = (r"C:\Users\n.gerdes\Documents\HSCam_PythonApi\Sessions")
+    Sessions_folder = (r"C:\Users\Beni\Documents\Ximea cam Python\Testing_Makedirs\Sessions")
     
-    
-    Datasets = []
-    Layers = []
     print("Hello")
     print("Sessions folder path: %s" %(Sessions_folder))
     print("Make sure the correct path for the Session folder is set!")
@@ -166,44 +132,73 @@ def setup_folders():
 
 
 
+cam = xiapi.Camera()
+print('Opening first camera...')
+cam.open_device()
 
+
+#settings
+cam.set_imgdataformat('XI_RAW8')
+cam.set_exposure(1000)
+print('Exposure was set to %i us' %cam.get_exposure())
+
+
+#create instance of Image to store image data and metadata
+img = xiapi.Image()
+
+
+#start data acquisition
+print('Starting data acquisition...')
+cam.start_acquisition()
+
+cam.get_image(img)
+data_raw_nda = img.get_image_data_numpy()
+
+
+
+def laser_off(off_threshold,count_threshold):
+    
+    if (max_val < off_threshold):
+        off_counter+=1
+    else:
+        off_counter=0
+    if (off_counter > count_threshold):
+        return 1
+    else:
+        return 0
+
+
+def breatime():  
+    do_nothing = 1
+    while(laser_off(20,30)==1):
+        cam.get_image(img)
+        data_raw_nda = img.get_image_data_numpy()
+        max_val = np.amax(data_raw_nda) 
+        do_nothing+=1
+        do_nothing-=1
+        
+
+def waitfor_on():
+    do_nothing=1
+    while(laser_off(20,30)==1):
+        cam.get_image(img)
+        data_raw_nda = img.get_image_data_numpy()
+        max_val = np.amax(data_raw_nda) 
+        do_nothing+=1
+        do_nothing-=1    
 
 
 def calibrate_exposure(ce_num_frames , ce_num_layers, ce_setpoint, exp_limit):
-    #initialize variables
+
     pid = PID(2, 1, 0, setpoint=ce_setpoint, sample_time = None)
-    #exposure_times = np.array([])
-    #max_vals = np.array([])
-    #set path where images will be saved
-    #os.chdir(r'C:\\Users\\n.gerdes\\Documents\\HSCam_PythonApi\\Trial_Files\\Imgs')
+
     ce_layer_counter = 0
     start_exposure = 100
     new_exp = start_exposure
     
-    #create instance for first connected camera
-    #cam = xiapi.Camera()
-    #print('Opening first camera...')
-    #cam.open_device()
-    #print(cam.get_exposure_increment())
-    
-    #settings
-    #cam.set_imgdataformat('XI_RAW8')
+
     cam.set_exposure(start_exposure)
-    #print('Exposure was set to %i us' %cam.get_exposure())
-    
-    
-    #create instance of Image to store image data and metadata
-    #img = xiapi.Image()
-    
-    
-    #start data acquisition
-    #print('Starting data acquisition...')
-   # cam.start_acquisition()
-    
-    
-    #for timing the frame loop
-    #start_time = time.time()
-    
+
     
     for x in range(ce_num_frames):
         if (ce_layer_counter < ce_num_layers):            
@@ -228,46 +223,8 @@ def calibrate_exposure(ce_num_frames , ce_num_layers, ce_setpoint, exp_limit):
                 if (new_exp < exp_limit and new_exp > 0):            
                         cam.set_exposure(new_exp)
                
-        #exposure_times = np.append(exposure_times, ([new_exp]),axis=0)    
-    #    exposure_times = np.append(exposure_times, ([output]),axis=0)
-    #    max_vals = np.append(max_vals, ([max_val]),axis=0)
-    #for timing the frame loop
-    #print("--- %f seconds ---" % (time.time() - start_time))
-    
-    #new_exposure = output
-    #obtain new frame with ROI applied
-    #cam.get_image(img)
-    #data_raw_nda = img.get_image_data_numpy()
-    
-    
-    #stop camera
-    #cam.stop_acquisition()
-    #cam.close_device()
-    
-    
-    #testing seaborn heatmap
-    #print(max_vals)
-    #print(exposure_times)
-    #print(int(new_exposure))
-    #print(max_val)
-    #sb.heatmap(data_raw_nda)
-    #plt.show()    
-
-
-
-
-
-def laser_off(off_threshold,count_threshold):
-    
-    if (max_val < off_threshold):
-        off_counter+=1
-    else:
-        off_counter=0
-    if (off_counter > count_threshold):
-        return 1
-    else:
-        return 0
-    
+ 
+ 
     
 
         
@@ -276,37 +233,7 @@ def calibrate_ROI(roi_num_frames , roi_num_layers,roi_extra_space):
 #initialize variables
     Centers_of_mass = np.array([[],[]])
 
-    
-    
-    #set path where images will be saved
-    #os.chdir(r'C:\\Users\\n.gerdes\\Documents\\HSCam_PythonApi\\Trial_Files\\Imgs')
-    
-    
-    #create instance for first connected camera
-    #cam = xiapi.Camera()
-    #print('Opening first camera...')
-    #cam.open_device()
-    
-    
-    #settings
-    #cam.set_imgdataformat('XI_RAW8')
-    #cam.set_exposure(10000)
-    #print('Exposure was set to %i us' %cam.get_exposure())
-    
-    
-    #create instance of Image to store image data and metadata
-    #img = xiapi.Image()
-    
-    
-    #start data acquisition
-    #print('Starting data acquisition...')
-    #cam.start_acquisition()
-    
-    
-    #for timing the frame loop
-    #start_time = time.time()
-    
-    
+   
     for x in range(roi_num_frames):
         if (roi_layer_counter < roi_num_layers):            
             if (x > 10):
@@ -322,11 +249,7 @@ def calibrate_ROI(roi_num_frames , roi_num_layers,roi_extra_space):
             cY = CM[0]
             Centers_of_mass = np.append(Centers_of_mass, ([cX],[cY]),axis=1)
       
-    
-    #for timing the frame loop
-    #print("--- %f seconds ---" % (time.time() - start_time))
-    
-    
+
     #Calculate min,max valeues for both x and y centers of mass, then add 100 for an outer boundary
     Pre_width = (np.amax(Centers_of_mass[0])+roi_extra_space) - (np.amin(Centers_of_mass[0]-roi_extra_space))
     Pre_height = (np.amax(Centers_of_mass[1])+roi_extra_space) - (np.amin(Centers_of_mass[1])-roi_extra_space)
@@ -343,8 +266,7 @@ def calibrate_ROI(roi_num_frames , roi_num_layers,roi_extra_space):
     Height = int(Height)
     X_offset = int(X_offset)
     Y_offset = int(Y_offset)
-    
-    
+     
     
     #set ROI
     cam.set_width(Width)
@@ -352,19 +274,7 @@ def calibrate_ROI(roi_num_frames , roi_num_layers,roi_extra_space):
     cam.set_offsetX(X_offset)
     cam.set_offsetY(Y_offset)
     #cam.set_exposure(100)
-    
-    #obtain new frame with ROI applied
-    #cam.get_image(img)
-    #ata_raw_nda = img.get_image_data_numpy()
-    
-    
-    #stop camera
-    #cam.stop_acquisition()
-    #cam.close_device()
-    
-    #testing seaborn heatmap
-    #sb.heatmap(data_raw_nda)
-    #plt.show()
+
     #print summary of calibration
     """print("ROI calibration summary:\n\n")
     print("Number of frames used: %s\n" %(num_frames))
@@ -376,23 +286,7 @@ def calibrate_ROI(roi_num_frames , roi_num_layers,roi_extra_space):
     print('Done.')"""        
     
 
-def breatime():  
-    do_nothing = 1
-    while(laser_off(20,30)==1):
-        cam.get_image(img)
-        data_raw_nda = img.get_image_data_numpy()
-        max_val = np.amax(data_raw_nda) 
-        do_nothing+=1
-        do_nothing-=1
-        
 
-def waitfor_on():
-    while(laser_off(20,30)==1):
-        cam.get_image(img)
-        data_raw_nda = img.get_image_data_numpy()
-        max_val = np.amax(data_raw_nda) 
-        do_nothing+=1
-        do_nothing-=1
 
 
 def worktime():
@@ -419,3 +313,40 @@ def worktime():
             cam.stop_acquisition()
             cam.close_device()          
             sys.exit()
+
+
+
+
+
+
+
+
+
+setup_folders()
+
+
+#setup2()
+
+waitfor_on()
+
+calibrate_exposure()
+
+calibrate_ROI()
+
+
+
+
+
+
+
+#main(total layers)
+try:
+    while True:
+        worktime()
+        breatime()
+except KeyboardInterrupt:
+    pass
+
+
+
+
