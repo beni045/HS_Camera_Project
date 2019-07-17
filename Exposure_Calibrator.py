@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from simple_pid import PID
 
 #initialize variables
-num_frames = 200
+num_frames = 2
 pid = PID(2, 1, 0, setpoint=100, sample_time = None)
 exposure_times = np.array([])
 max_vals = np.array([])

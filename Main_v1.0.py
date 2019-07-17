@@ -32,7 +32,7 @@ global_off_counter=0
 def setup_folders():
     """ SET PATH OF SESSIONS FOLDER HERE"""
     global  Sessions_folder
-    Sessions_folder = (r"C:\Users\Beni\Documents\Ximea cam Python\Testing_Makedirs\Sessions")
+    Sessions_folder = (r"C:\Users\n.gerdes\Documents\HSCam_PythonApi\Sessions")
     
     print("Hello")
     print("Sessions folder path: %s" %(Sessions_folder))
@@ -103,7 +103,7 @@ def setup_folders():
             Dataset_ID = uuid.uuid4()
             list = [Power, Speed, Layer_thickness, Num_Layers, Dataset_ID,Session_ID, Date ]
             global Layers
-            Layers.append(Num_Layers)
+            Layers.append(int(Num_Layers))
             os.chdir("%s" %(Sessions_folder))
             with open('Index.csv' , 'a', newline = '') as g:
                 writer = csv.writer(g)   
