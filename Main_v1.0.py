@@ -26,8 +26,8 @@ Layers = []
 dataset_num=0
 current_layer_num=1
 max_val = 10
-
-
+off_counter = 0
+roi_layer_counter = 1
 
 def setup_folders():
     """ SET PATH OF SESSIONS FOLDER HERE"""
@@ -139,7 +139,7 @@ cam.open_device()
 
 #settings
 cam.set_imgdataformat('XI_RAW8')
-cam.set_exposure(1000)
+cam.set_exposure(10000)
 print('Exposure was set to %i us' %cam.get_exposure())
 
 
@@ -170,7 +170,7 @@ def laser_off(off_threshold,count_threshold):
 
 def breatime():  
     do_nothing = 1
-    while(laser_off(20,30)==1):
+    while(laser_off(20,100)==1):
         cam.get_image(img)
         data_raw_nda = img.get_image_data_numpy()
         max_val = np.amax(data_raw_nda) 
@@ -180,7 +180,7 @@ def breatime():
 
 def waitfor_on():
     do_nothing=1
-    while(laser_off(20,30)==1):
+    while(laser_off(20,100)==1):
         cam.get_image(img)
         data_raw_nda = img.get_image_data_numpy()
         max_val = np.amax(data_raw_nda) 
@@ -238,7 +238,7 @@ def calibrate_ROI(roi_num_frames , roi_num_layers,roi_extra_space):
         if (roi_layer_counter < roi_num_layers):            
             if (x > 10):
                 while (laser_off(20,30)==1):
-                    ce_layer_counter+=1                   
+                    roi_layer_counter+=1                   
                     breaktime()
             #get data and pass them from camera to img
             cam.get_image(img)
@@ -329,9 +329,9 @@ setup_folders()
 
 waitfor_on()
 
-calibrate_exposure()
+calibrate_exposure(250 , 20, 150, 60000)
 
-calibrate_ROI()
+calibrate_ROI(200000 , 2, 100)
 
 
 
