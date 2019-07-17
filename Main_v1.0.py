@@ -157,7 +157,7 @@ data_raw_nda = img.get_image_data_numpy()
 
 
 def laser_off(off_threshold,count_threshold):
-    
+    max_val = np.amax(data_raw_nda) 
     if (max_val < off_threshold):
         off_counter+=1
     else:
@@ -168,12 +168,12 @@ def laser_off(off_threshold,count_threshold):
         return 0
 
 
-def breatime():  
+def breaktime():  
     do_nothing = 1
     while(laser_off(20,100)==1):
         cam.get_image(img)
         data_raw_nda = img.get_image_data_numpy()
-        max_val = np.amax(data_raw_nda) 
+        
         do_nothing+=1
         do_nothing-=1
         
@@ -183,7 +183,7 @@ def waitfor_on():
     while(laser_off(20,100)==1):
         cam.get_image(img)
         data_raw_nda = img.get_image_data_numpy()
-        max_val = np.amax(data_raw_nda) 
+        
         do_nothing+=1
         do_nothing-=1    
 
@@ -232,7 +232,7 @@ def calibrate_exposure(ce_num_frames , ce_num_layers, ce_setpoint, exp_limit):
 def calibrate_ROI(roi_num_frames , roi_num_layers,roi_extra_space):
 #initialize variables
     Centers_of_mass = np.array([[],[]])
-
+    roi_layer_counter=1
    
     for x in range(roi_num_frames):
         if (roi_layer_counter < roi_num_layers):            
