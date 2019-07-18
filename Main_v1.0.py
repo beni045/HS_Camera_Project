@@ -297,6 +297,8 @@ def calibrate_ROI(roi_num_frames , roi_num_layers,roi_extra_space):
 
 
 def worktime():
+    #sb.heatmap(data_raw_nda)
+    #plt.show()
     global dataset_num
     global data_raw_nda
     global current_layer_num
@@ -304,11 +306,8 @@ def worktime():
     if(current_layer_num ==1):
         calibrate_exposure(400, 3,150,60000)
         print("worktime exposure calibration done")
-        cam.get_image(img)
-    data_raw_nda = img.get_image_data_numpy()
 
-    sb.heatmap(data_raw_nda)
-    plt.show()
+
     if os.path.exists("%s\\%s\\%s\\Layer_%s" %(Sessions_folder,Current_session_folder,Datasets[dataset_num],current_layer_num)):
         os.chdir("%s\\%s\\%s\\Layer_%s" %(Sessions_folder,Current_session_folder,Datasets[dataset_num],current_layer_num))
     else:       
@@ -324,7 +323,7 @@ def worktime():
         f= open("%d" % (framecount),"w+b")
         f.write(data_raw_nda)
         f.close()
-        print("Set_%s - Layer_%s - Frame_%s" %(dataset_num,current_layer_num,framecount))
+        print("Set_%s - Layer_%s - Frame_%s" %(dataset_num+1,current_layer_num,framecount))
         framecount+=1
 
     current_layer_num+=1
@@ -404,6 +403,7 @@ print("Going into superloop")
 try:
     while True:
         worktime()
+        breaktime()
 except KeyboardInterrupt:
     cam.close_device()          
     sys.exit()
