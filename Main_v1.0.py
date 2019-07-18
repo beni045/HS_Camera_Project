@@ -28,6 +28,8 @@ current_layer_num=1
 roi_layer_counter = 1
 data_raw_nda =0
 global_off_counter=0
+global_on_counter=0
+
 
 def setup_folders():
     """ SET PATH OF SESSIONS FOLDER HERE"""
@@ -138,14 +140,23 @@ def setup_folders():
 
 
 
-def laser_status(off_threshold,count_threshold):
+def laser_on(on_threshold,count_threshold):
+    global global_on_counter
+    max_val = np.amax(data_raw_nda)
+    if (max_val > on_threshold):
+        global_on_counter+=1
+    if (global_on_counter > count_threshold):
+        global_on_counter = 0
+        return 1
+    else:
+        return 0
+
+
+def laser_off(off_threshold,count_threshold):
     global global_off_counter
     max_val = np.amax(data_raw_nda) 
     if (max_val < off_threshold):
-
         global_off_counter+=1
-    else:
-        global_off_counter+=0
     if (global_off_counter > count_threshold):
         global_off_counter = 0
         return 1
@@ -155,9 +166,14 @@ def laser_status(off_threshold,count_threshold):
 
 
 
-def breaktime():  
-    while(laser_status(20,100)==1):       
-        time.sleep(0.00001)
+def breaktime():
+    global data_raw_nda
+    while(laser_on(5,5)==0):
+        print("in breaktime")
+        cam.get_image(img)
+        data_raw_nda = img.get_image_data_numpy()
+        max_val = np.amax(data_raw_nda)
+        time.sleep(0.0001)
     
         
   
@@ -165,38 +181,48 @@ def breaktime():
 
 
 def calibrate_exposure(ce_num_frames , ce_num_layers, ce_setpoint, exp_limit):
-    global new_exposure
-    pid = PID(2, 1, 0, setpoint=ce_setpoint, sample_time = None)
+    global new_exp
+    pid = PID(1.3, 0, 0, setpoint=ce_setpoint, sample_time = None)
 
     ce_layer_counter = 0
-    start_exposure = 100
+    start_exposure = 80
     new_exp = start_exposure
     
 
     cam.set_exposure(start_exposure)
 
     
-    for x in range(ce_num_frames):
+    for i in range(ce_num_frames):
         
-        if (ce_layer_counter < ce_num_layers):            
-            if (x > 10):
-                while (laser_status(20,30)==1):
-                    ce_layer_counter+=1                   
-                    breaktime()
-                    
+        
+        if (ce_layer_counter < ce_num_layers):
+            
+            #if (i > 10):
+            """if (laser_off(200,5)==1):
+                    ce_layer_counter+=1
+                    print(ce_layer_counter)
+                    breaktime()"""
+                   
             #get data and pass them from camera to img
             cam.get_image(img)
+            
             data_raw_calib = img.get_image_data_numpy()
             
             
             #exposure time PID
             max_val_calib = np.amax(data_raw_calib)       
             #max_vals = np.append(max_vals, ([max_val]),axis=0)
-            if (max_val_calib > 30) :
+            if (max_val_calib > 0) :
                 output = pid(max_val_calib)
                 new_exp = new_exp + output
+                if (new_exp < 100):
+                    new_exp =100
                 new_exp = (round(new_exp / 5))*5
                 new_exp = int(new_exp)
+                if(initial_calib_done == 1):
+                    print("Set_%s - Exposure calibration: %s" %(dataset_num+1,new_exp))
+                else:
+                    print("Initial Exposure Calibration: %s" %(new_exp))                    
                 if (new_exp < exp_limit and new_exp > 0):            
                         cam.set_exposure(new_exp)
         else:
@@ -214,18 +240,20 @@ def calibrate_ROI(roi_num_frames , roi_num_layers,roi_extra_space):
    
     for x in range(roi_num_frames):
         if (roi_layer_counter < roi_num_layers):            
-            if (x > 10):
-                while (laser_status(20,30)==1):
-                    roi_layer_counter+=1                   
-                    breaktime()
+            #if (x > 10):
+            """while (laser_status(20,30)==1):
+                roi_layer_counter+=1                   
+                breaktime()"""
             #get data and pass them from camera to img
             cam.get_image(img)
             data_raw_nda = img.get_image_data_numpy()
             #calculate COM for frame array and store it in Centers_of_mass array
             CM = ndimage.measurements.center_of_mass(data_raw_nda)
+            print("ROI_Calibraton - CENTER OF MASS: (X , Y): (%.d , %.d)" %(CM[1],CM[0])) 
             cX = CM[1]
             cY = CM[0]
             Centers_of_mass = np.append(Centers_of_mass, ([cX],[cY]),axis=1)
+            
             
         else:            
             return     
@@ -256,14 +284,13 @@ def calibrate_ROI(roi_num_frames , roi_num_layers,roi_extra_space):
     #cam.set_exposure(100)
 
     #print summary of calibration
-    """print("ROI calibration summary:\n\n")
-    print("Number of frames used: %s\n" %(num_frames))
+    print("ROI calibration summary:\n\n")
     print("Centers of mass array: %s\n" %(Centers_of_mass))
     print("Calibrated Width: %s\n" %(Width))
     print("Calibrated Height: %s\n" %(Height))
     print("Calibrated X_offset: %s\n" %(X_offset))
     print("Calibrated Y_offset: %s\n\n" %(Y_offset))
-    print('Done.')"""        
+    print('Done.')       
     
 
 
@@ -275,8 +302,13 @@ def worktime():
     global current_layer_num
     framecount=1
     if(current_layer_num ==1):
-        calibrate_exposure(10000, 3,150,60000)
-                
+        calibrate_exposure(400, 3,150,60000)
+        print("worktime exposure calibration done")
+        cam.get_image(img)
+    data_raw_nda = img.get_image_data_numpy()
+
+    sb.heatmap(data_raw_nda)
+    plt.show()
     if os.path.exists("%s\\%s\\%s\\Layer_%s" %(Sessions_folder,Current_session_folder,Datasets[dataset_num],current_layer_num)):
         os.chdir("%s\\%s\\%s\\Layer_%s" %(Sessions_folder,Current_session_folder,Datasets[dataset_num],current_layer_num))
     else:       
@@ -284,7 +316,7 @@ def worktime():
         cam.close_device()          
         sys.exit()
 
-    while(laser_status(20,30)==0):
+    while(laser_off(20,30)==0):
         cam.get_image(img)
         data_raw_nda = img.get_image_data_numpy()
         #print("--- %f seconds ---" % (time.time() - start_time))
@@ -292,7 +324,9 @@ def worktime():
         f= open("%d" % (framecount),"w+b")
         f.write(data_raw_nda)
         f.close()
+        print("Set_%s - Layer_%s - Frame_%s" %(dataset_num,current_layer_num,framecount))
         framecount+=1
+
     current_layer_num+=1
     if(current_layer_num > Layers[dataset_num]):
         dataset_num+=1
@@ -306,7 +340,7 @@ def worktime():
 
 
 
-
+initial_calib_done = 0
 
 setup_folders()
 
@@ -319,7 +353,7 @@ cam.open_device()
 
 #settings
 cam.set_imgdataformat('XI_RAW8')
-cam.set_exposure(10000)
+cam.set_exposure(1000)
 print('Exposure was set to %i us' %cam.get_exposure())
 
 
@@ -343,11 +377,19 @@ breaktime()
 
 print("\n Breaktime over, starting exposure calibration")
 
-calibrate_exposure(250 , 20, 150, 60000)
+calibrate_exposure(300 , 20, 150, 20000)
 
-print("\n Exposure calibration done. Exposure time set: %s" %(new_exposure))
+print("\n Exposure calibration done. Exposure time set: %s" %(new_exp))
+initial_calib_done = 1
 
-calibrate_ROI(1000 , 2, 100)
+cam.get_image(img)
+data_raw_nda = img.get_image_data_numpy()
+
+sb.heatmap(data_raw_nda)
+plt.show()
+
+print("Going into ROI calibation")
+calibrate_ROI(200 , 2, 100)
 
 print("ROI calbration done")
 
@@ -362,8 +404,10 @@ print("Going into superloop")
 try:
     while True:
         worktime()
-        breaktime()
 except KeyboardInterrupt:
+    cam.close_device()          
+    sys.exit()
+    
     pass
 
 
