@@ -165,7 +165,7 @@ def breaktime():
 
 
 def calibrate_exposure(ce_num_frames , ce_num_layers, ce_setpoint, exp_limit):
-
+    global new_exposure
     pid = PID(2, 1, 0, setpoint=ce_setpoint, sample_time = None)
 
     ce_layer_counter = 0
@@ -310,7 +310,7 @@ def worktime():
 
 setup_folders()
 
-
+print("Setup_folders done!")
 
 cam = xiapi.Camera()
 print('Opening first camera...')
@@ -335,16 +335,29 @@ cam.get_image(img)
 data_raw_nda = img.get_image_data_numpy()
 
 
-
+print("\nFirst image recieved, going into breaktime to wait for source to turn on:")
 
 
 breaktime()
 
+
+print("\n Breaktime over, starting exposure calibration")
+
 calibrate_exposure(250 , 20, 150, 60000)
+
+print("\n Exposure calibration done. Exposure time set: %s" %(new_exposure))
 
 calibrate_ROI(1000 , 2, 100)
 
+print("ROI calbration done")
 
+cam.get_image(img)
+data_raw_nda = img.get_image_data_numpy()
+
+sb.heatmap(data_raw_nda)
+plt.show()
+
+print("Going into superloop")
 
 try:
     while True:
